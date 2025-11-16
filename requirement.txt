@@ -1,0 +1,4 @@
+Library:
+-   python-vlc
+-   requests
+-   pygame
