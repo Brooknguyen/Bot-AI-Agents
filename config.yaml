@@ -1,0 +1,16 @@
+ollama:
+  base_url: "http://localhost:11434"
+  model: "gemma3:1b"
+
+servers:
+  - id: "music"
+    name: "Local Music Server"
+    command: "python"
+    args:
+      - "./mcp_server_music/mcp_server.py"
+
+  - id: "gmail"
+    name: "Gmail Data Server"
+    command: "python"
+    args:
+      - "./mcp_server_gmail/mcp_server.py"

@@ -1,4 +1,8 @@
 Library:
+for mcp_client:
+-   pyyaml
+-   mcp[cli]
+
 for mcp_server_music:
 -   requests
 -   pygame
