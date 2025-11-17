@@ -207,7 +207,7 @@ YÊU CẦU:
 - Ví dụ: nếu user hỏi về email chưa đọc hôm nay, có thể:
   {{
     "tool": "gmail_list_today_unread",
-    "arguments": {{"user_email": "nguyenbrook0412@gmail.com"}}
+    "arguments": {{"user_email": "synopex.no.reply@gmail.com"}}
   }}
 """
         result = call_ollama_for_json(
@@ -258,7 +258,7 @@ YÊU CẦU:
                 return f"❌ Lỗi khi gọi tool '{tool_name}': {e}"
 
             # tool_result.structured_content chứa JSON từ server
-            structured = tool_result.structured_content
+            structured = tool_result.structuredContent
 
             # 4. Nhờ LLM format JSON thành câu trả lời
             pretty = call_ollama_chat(

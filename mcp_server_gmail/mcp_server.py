@@ -10,12 +10,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from bs4 import BeautifulSoup
 
-from mcp import Server
-from mcp.server.stdio import stdio_server
+# DÙNG FastMCP THAY VÌ Server LOW-LEVEL
+from mcp.server.fastmcp import FastMCP
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
-server = Server("gmail_data_server")
+# Tạo MCP server instance
+mcp = FastMCP("gmail_data_server")
 
 
 def safe_token_filename(email: str) -> str:
@@ -43,7 +44,7 @@ def get_gmail_service(user_email: str):
             )
             creds = flow.run_local_server(port=0)
 
-        with open(token_file, "w") as f:
+        with open(token_file, "w", encoding="utf-8") as f:
             f.write(creds.to_json())
 
     return build("gmail", "v1", credentials=creds)
@@ -64,7 +65,9 @@ def decode_body(payload):
         data = part.get("body", {}).get("data")
         if not data:
             continue
-        decoded = base64.urlsafe_b64decode(data.encode("utf-8")).decode("utf-8", "ignore")
+        decoded = base64.urlsafe_b64decode(data.encode("utf-8")).decode(
+            "utf-8", "ignore"
+        )
         if mime == "text/plain" and text_plain is None:
             text_plain = decoded
         elif mime == "text/html" and text_html is None:
@@ -85,11 +88,14 @@ def get_header(headers, name):
     return ""
 
 
-@server.tool(
-    name="gmail_list_today_unread",
-    description="Trả về danh sách email chưa đọc trong NGÀY HÔM NAY cho 1 tài khoản Gmail."
-)
+# ------------- MCP TOOLS (chỉ lấy dữ liệu) -------------
+
+
+@mcp.tool()
 async def gmail_list_today_unread(user_email: str) -> dict:
+    """
+    Trả về danh sách email CHƯA ĐỌC trong NGÀY HÔM NAY cho 1 tài khoản Gmail.
+    """
     service = get_gmail_service(user_email)
 
     today = datetime.date.today()
@@ -123,15 +129,15 @@ async def gmail_list_today_unread(user_email: str) -> dict:
     return {"emails": emails}
 
 
-@server.tool(
-    name="gmail_search_by_query",
-    description="Search Gmail bằng Gmail search query (ví dụ: 'is:unread \"báo cáo tuần\"', 'from:hr')."
-)
+@mcp.tool()
 async def gmail_search_by_query(
     user_email: str,
     gmail_query: str,
     max_results: int = 5,
 ) -> dict:
+    """
+    Search Gmail bằng Gmail search query (ví dụ: 'is:unread \"báo cáo tuần\"', 'from:hr').
+    """
     service = get_gmail_service(user_email)
 
     res = service.users().messages().list(
@@ -163,10 +169,6 @@ async def gmail_search_by_query(
     return {"emails": emails}
 
 
-async def main():
-    async with stdio_server() as (read, write):
-        await server.run(read, write)
-
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    # FastMCP hỗ trợ trực tiếp stdio
+    mcp.run(transport="stdio")
