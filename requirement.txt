@@ -1,4 +1,10 @@
 Library:
--   python-vlc
+for mcp_server_music:
 -   requests
 -   pygame
+
+for mcp_server_gmail:
+-   google-api-python-client 
+-   google-auth-httplib2 
+-   google-auth-oauthlib
+-   beautifulsoup4
